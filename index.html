@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Radiation Unit Converter</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Important: do NOT set X-Frame-Options or a restrictive CSP; Notion needs to iframe this. -->
+</head>
+<body>
+  <main class="container">
+    <h1>Radiation Unit Converter</h1>
+    <p class="note">Local-only calculator (no servers). Safe to embed in Notion.</p>
+
+    <section class="card">
+      <h2>Dose</h2>
+      <div class="grid">
+        <label>Sievert (Sv)
+          <input type="number" id="dose-sv" step="any" placeholder="e.g., 0.002" />
+        </label>
+        <label>millisievert (mSv)
+          <input type="number" id="dose-msv" step="any" />
+        </label>
+        <label>microsievert (µSv)
+          <input type="number" id="dose-usv" step="any" />
+        </label>
+        <label>rem
+          <input type="number" id="dose-rem" step="any" />
+        </label>
+        <label>mrem
+          <input type="number" id="dose-mrem" step="any" />
+        </label>
+      </div>
+      <details class="assumption">
+        <summary>Gy / rad conversions (assume QF = 1 for photons/β)</summary>
+        <div class="grid">
+          <label>gray (Gy)
+            <input type="number" id="dose-gy" step="any" />
+          </label>
+          <label>rad
+            <input type="number" id="dose-rad" step="any" />
+          </label>
+        </div>
+        <p class="tiny">
+          When quality factor QF ≈ 1 (common for γ/β), 1 Gy ≈ 1 Sv and 1 rad ≈ 1 rem.
+          For neutrons/α, this does not hold—don’t use these cross-conversions.
+        </p>
+      </details>
+      <button id="clear-dose" class="ghost">Clear dose</button>
+    </section>
+
+    <section class="card">
+      <h2>Dose rate</h2>
+      <div class="grid">
+        <label>µSv/h
+          <input type="number" id="rate-usvh" step="any" placeholder="e.g., 0.15" />
+        </label>
+        <label>mSv/h
+          <input type="number" id="rate-msvh" step="any" />
+        </label>
+        <label>mrem/h
+          <input type="number" id="rate-mremh" step="any" />
+        </label>
+      </div>
+      <button id="clear-rate" class="ghost">Clear rate</button>
+    </section>
+
+    <section class="card">
+      <h2>CPM ⇄ µSv/h (approx)</h2>
+      <p class="tiny">CPM→dose depends on your tube & energy. Use your own factor if you’ve calibrated.</p>
+      <div class="grid">
+        <label>Counts per minute (CPM)
+          <input type="number" id="cpm" step="any" placeholder="e.g., 35" />
+        </label>
+        <label>CPM per µSv/h (factor)
+          <input type="number" id="cpmFactor" step="any" value="175" />
+        </label>
+        <label>µSv/h (from CPM)
+          <input type="number" id="cpm-usvh" step="any" />
+        </label>
+      </div>
+      <p class="tiny">
+        Example factors (very rough): SBM-20 ≈ 175 CPM per µSv/h; pancake probes vary widely.
+        Don’t use for safety decisions.
+      </p>
+      <button id="clear-cpm" class="ghost">Clear CPM</button>
+    </section>
+
+    <footer>
+      <p class="tiny">Made by you. All math runs in your browser. No data leaves the page.</p>
+    </footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
