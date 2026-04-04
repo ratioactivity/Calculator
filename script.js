@@ -259,6 +259,12 @@ break`;
   function variantForms(word) {
     const forms = new Set([word]);
     if (word.endsWith("'m")) forms.add(word.replace("'m", " am"));
+    if (word.endsWith("'ll")) forms.add(word.replace("'ll", ""));
+    if (word.endsWith("'re")) forms.add(word.replace("'re", ""));
+    if (word.endsWith("'ve")) forms.add(word.replace("'ve", ""));
+    if (word.endsWith("'d")) forms.add(word.replace("'d", ""));
+    if (word.endsWith("'s")) forms.add(word.replace("'s", ""));
+    if (word.endsWith("n't")) forms.add(word.replace("n't", ""));
     if (word === "i") forms.add("i'm");
     if (word.endsWith("s")) forms.add(word.slice(0, -1));
     if (word.endsWith("ed")) forms.add(word.slice(0, -2));
@@ -267,6 +273,25 @@ break`;
       forms.add(`${word.slice(0, -3)}e`);
     }
     return Array.from(forms).filter(Boolean);
+  }
+
+  const pronounGroups = [
+    ["i", "me", "my", "mine", "myself", "i'm", "i am", "i'll", "i've", "i'd"],
+    ["you", "your", "yours", "yourself", "you're", "you are", "you'll", "you've", "you'd"],
+  ];
+
+  function expandPronounForms(vocabMap) {
+    const expanded = new Map(vocabMap);
+    pronounGroups.forEach((group) => {
+      const knownEntry = group.find((item) => expanded.has(item));
+      if (knownEntry) {
+        const note = expanded.get(knownEntry) || `Known through "${knownEntry}"`;
+        group.forEach((item) => {
+          if (!expanded.has(item)) expanded.set(item, note);
+        });
+      }
+    });
+    return expanded;
   }
 
   function parseVocabulary() {
@@ -324,7 +349,7 @@ break`;
   }
 
   function calculateLanguage() {
-    const vocabMap = parseVocabulary();
+    const vocabMap = expandPronounForms(parseVocabulary());
     const tokens = tokenize(languageInput.value);
 
     let totalWords = 0;

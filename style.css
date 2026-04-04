@@ -91,6 +91,15 @@ details.assumption {
   padding-top: 12px;
 }
 
+#known-translation {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #f3f8ff;
+  font-weight: 700;
+}
+
 .token-view {
   line-height: 2;
   background: #0f1420;
