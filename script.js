@@ -252,8 +252,10 @@ break`;
   const vocabPreview = document.getElementById("vocab-preview");
   const toggleRadiationButton = document.getElementById("toggle-radiation");
   const toggleLanguageButton = document.getElementById("toggle-language");
+  const toggleTimeManagerButton = document.getElementById("toggle-time-manager");
   const radiationContent = document.getElementById("radiation-content");
   const languageContent = document.getElementById("language-content");
+  const timeManagerContent = document.getElementById("time-manager-content");
   const radiationIntro = document.querySelector(".radiation-intro");
   const vocabSaveName = document.getElementById("vocab-save-name");
   const saveVocabListButton = document.getElementById("save-vocab-list");
@@ -266,6 +268,18 @@ break`;
   const vocabLockedKey = "language_vocab_locked_v1";
   const radiationCollapsedKey = "radiation_collapsed_v1";
   const languageCollapsedKey = "language_collapsed_v1";
+  const timeManagerCollapsedKey = "time_manager_collapsed_v1";
+  const timeStartModeInputs = document.querySelectorAll('input[name="time-start-mode"]');
+  const specificStartInput = document.getElementById("time-specific-start");
+  const taskListInput = document.getElementById("time-task-list");
+  const breakListInput = document.getElementById("time-break-list");
+  const deadlineInput = document.getElementById("time-deadline");
+  const calculateTimePlanButton = document.getElementById("calculate-time-plan");
+  const totalTasksOutput = document.getElementById("time-total-tasks");
+  const totalBreaksOutput = document.getElementById("time-total-breaks");
+  const totalRequiredOutput = document.getElementById("time-total-required");
+  const requiredStartOutput = document.getElementById("time-required-start");
+  const timeStatusOutput = document.getElementById("time-status");
 
   const savedVocab = localStorage.getItem(vocabStorageKey);
   vocabList.value = savedVocab && savedVocab.trim() ? savedVocab : defaultVocabText;
@@ -292,6 +306,79 @@ break`;
       ? "Expand language calculator"
       : "Minimize language calculator";
     localStorage.setItem(languageCollapsedKey, isCollapsed ? "true" : "false");
+  }
+
+  function setTimeManagerCollapsedState(isCollapsed) {
+    timeManagerContent.classList.toggle("is-collapsed", isCollapsed);
+    toggleTimeManagerButton.textContent = isCollapsed ? "Expand time manager" : "Minimize time manager";
+    localStorage.setItem(timeManagerCollapsedKey, isCollapsed ? "true" : "false");
+  }
+
+  function parseMinuteEntries(rawText) {
+    return rawText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .reduce((sum, line) => {
+        const match = line.match(/(\d+(?:\.\d+)?)\s*$/);
+        if (!match) return sum;
+        return sum + Number(match[1]);
+      }, 0);
+  }
+
+  function currentStartMode() {
+    const selected = Array.from(timeStartModeInputs).find((input) => input.checked);
+    return selected ? selected.value : "current";
+  }
+
+  function formatDateTimeOutput(dateObj) {
+    return dateObj.toLocaleString([], {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
+  function calculateTimePlan() {
+    const taskMinutes = parseMinuteEntries(taskListInput.value);
+    const breakMinutes = parseMinuteEntries(breakListInput.value);
+    const totalRequiredMinutes = taskMinutes + breakMinutes;
+    const deadlineValue = deadlineInput.value;
+    const deadlineMs = deadlineValue ? new Date(deadlineValue).getTime() : NaN;
+
+    totalTasksOutput.textContent = `${taskMinutes} min`;
+    totalBreaksOutput.textContent = `${breakMinutes} min`;
+    totalRequiredOutput.textContent = `${totalRequiredMinutes} min`;
+
+    if (!Number.isFinite(deadlineMs) || totalRequiredMinutes <= 0) {
+      requiredStartOutput.textContent = "Add a deadline and task/break times";
+      timeStatusOutput.textContent = "—";
+      return;
+    }
+
+    const requiredStartMs = deadlineMs - totalRequiredMinutes * 60 * 1000;
+    const requiredStart = new Date(requiredStartMs);
+    requiredStartOutput.textContent = formatDateTimeOutput(requiredStart);
+
+    const chosenStartMs =
+      currentStartMode() === "specific" && specificStartInput.value
+        ? new Date(specificStartInput.value).getTime()
+        : Date.now();
+
+    if (!Number.isFinite(chosenStartMs)) {
+      timeStatusOutput.textContent = "Add a valid specific start time";
+      return;
+    }
+
+    if (chosenStartMs <= requiredStartMs) {
+      const minutesAhead = Math.round((requiredStartMs - chosenStartMs) / 60000);
+      timeStatusOutput.textContent = `On track. You have ${minutesAhead} minutes of buffer.`;
+    } else {
+      const minutesLate = Math.round((chosenStartMs - requiredStartMs) / 60000);
+      timeStatusOutput.textContent = `Late by ${minutesLate} minutes.`;
+    }
   }
 
   function normalizeTerm(term) {
@@ -555,11 +642,28 @@ break`;
     const next = !languageContent.classList.contains("is-collapsed");
     setLanguageCollapsedState(next);
   });
+  toggleTimeManagerButton.addEventListener("click", () => {
+    const next = !timeManagerContent.classList.contains("is-collapsed");
+    setTimeManagerCollapsedState(next);
+  });
+  timeStartModeInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      specificStartInput.disabled = currentStartMode() !== "specific";
+      calculateTimePlan();
+    });
+  });
+  [specificStartInput, taskListInput, breakListInput, deadlineInput].forEach((input) => {
+    input.addEventListener("input", calculateTimePlan);
+  });
+  calculateTimePlanButton.addEventListener("click", calculateTimePlan);
 
   setVocabLockState(localStorage.getItem(vocabLockedKey) === "true");
   setRadiationCollapsedState(localStorage.getItem(radiationCollapsedKey) === "true");
   setLanguageCollapsedState(localStorage.getItem(languageCollapsedKey) === "true");
+  setTimeManagerCollapsedState(localStorage.getItem(timeManagerCollapsedKey) === "true");
+  specificStartInput.disabled = currentStartMode() !== "specific";
   calculateLanguage();
+  calculateTimePlan();
   localStorage.setItem(vocabStorageKey, vocabList.value);
   renderSavedSnapshotOptions();
   console.log("✅ script validated");
