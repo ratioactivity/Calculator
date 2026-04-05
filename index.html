@@ -3,16 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Radiation Unit Converter</title>
+  <title>Multi Calculator</title>
   <link rel="stylesheet" href="style.css" />
   <!-- Important: do NOT set X-Frame-Options or a restrictive CSP; Notion needs to iframe this. -->
 </head>
 <body>
   <main class="container">
     <h1>Radiation Unit Converter</h1>
-    <p class="note">How dead are you? Find out with this simple calculator.</p>
+    <div class="panel-actions">
+      <button id="toggle-radiation" class="ghost" type="button">Minimize radiation calculator</button>
+      <button id="toggle-language" class="ghost" type="button">Minimize language calculator</button>
+    </div>
+    <p class="note radiation-intro">How dead are you? Find out with this simple calculator.</p>
 
-    <section class="card">
+    <div id="radiation-content">
+    <section class="card radiation-card">
       <h2>Dose</h2>
       <div class="grid">
         <label>Sievert (Sv)
@@ -49,7 +54,7 @@
       <button id="clear-dose" class="ghost">Clear dose</button>
     </section>
 
-    <section class="card">
+    <section class="card radiation-card">
       <h2>Dose rate</h2>
       <div class="grid">
         <label>µSv/h
@@ -65,7 +70,7 @@
       <button id="clear-rate" class="ghost">Clear rate</button>
     </section>
 
-    <section class="card">
+    <section class="card radiation-card">
       <h2>CPM ⇄ µSv/h (approx)</h2>
       <p class="tiny">CPM→dose depends on your tube & energy. Use your own factor if you’ve calibrated.</p>
       <div class="grid">
@@ -84,6 +89,49 @@
         Don’t use for safety decisions.
       </p>
       <button id="clear-cpm" class="ghost">Clear CPM</button>
+    </section>
+    </div>
+
+    <section class="card" id="language-card">
+      <div class="language-header">
+        <h2>Language Vocabulary Translator</h2>
+        <button id="lock-vocab-list" class="ghost" type="button">Lock vocabulary editing</button>
+      </div>
+      <div id="language-content">
+      <p class="tiny">Keeps only words the character knows. Unknown words can be clicked to add to vocabulary.</p>
+
+      <label>Input dialogue
+        <textarea id="language-input" rows="4" placeholder="Type text to translate..."></textarea>
+      </label>
+
+      <label>Vocabulary list (one entry per line, optional note format: phrase = note)
+        <textarea id="vocab-list" rows="14"></textarea>
+      </label>
+      <div class="vocab-save-controls">
+        <label>Save label (example: Chapter 14)
+          <input type="text" id="vocab-save-name" placeholder="Chapter 14" />
+        </label>
+        <div class="save-row">
+          <button id="save-vocab-list" class="ghost" type="button">Save vocabulary snapshot</button>
+          <select id="saved-vocab-select"></select>
+          <button id="load-vocab-list" class="ghost" type="button">Load selected</button>
+          <button id="delete-vocab-list" class="ghost" type="button">Delete selected</button>
+        </div>
+      </div>
+
+      <div class="language-results">
+        <p><strong>Known-only translation:</strong> <span id="known-translation" class="tiny">—</span></p>
+        <p><strong>Understanding:</strong> <span id="understanding-percent" class="tiny">0%</span></p>
+        <div>
+          <p class="tiny"><strong>Token view</strong> (unknown terms are faded, click to add):</p>
+          <div id="token-view" class="token-view"></div>
+        </div>
+        <div>
+          <p class="tiny"><strong>Current vocabulary</strong> (hover for note):</p>
+          <div id="vocab-preview" class="vocab-preview"></div>
+        </div>
+      </div>
+      </div>
     </section>
 
     <footer>
