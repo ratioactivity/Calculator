@@ -134,6 +134,43 @@
       </div>
     </section>
 
+    <section class="card">
+      <h2>Language Vocabulary Translator</h2>
+      <p class="tiny">Keeps only words the character knows. Unknown words can be clicked to add to vocabulary.</p>
+
+      <label>Input dialogue
+        <textarea id="language-input" rows="4" placeholder="Type text to translate..."></textarea>
+      </label>
+
+      <label>Vocabulary list (one entry per line, optional note format: phrase = note)
+        <textarea id="vocab-list" rows="14"></textarea>
+      </label>
+      <div class="vocab-save-controls">
+        <label>Save label (example: Chapter 14)
+          <input type="text" id="vocab-save-name" placeholder="Chapter 14" />
+        </label>
+        <div class="save-row">
+          <button id="save-vocab-list" class="ghost" type="button">Save vocabulary snapshot</button>
+          <select id="saved-vocab-select"></select>
+          <button id="load-vocab-list" class="ghost" type="button">Load selected</button>
+          <button id="delete-vocab-list" class="ghost" type="button">Delete selected</button>
+        </div>
+      </div>
+
+      <div class="language-results">
+        <p><strong>Known-only translation:</strong> <span id="known-translation" class="tiny">—</span></p>
+        <p><strong>Understanding:</strong> <span id="understanding-percent" class="tiny">0%</span></p>
+        <div>
+          <p class="tiny"><strong>Token view</strong> (unknown terms are faded, click to add):</p>
+          <div id="token-view" class="token-view"></div>
+        </div>
+        <div>
+          <p class="tiny"><strong>Current vocabulary</strong> (hover for note):</p>
+          <div id="vocab-preview" class="vocab-preview"></div>
+        </div>
+      </div>
+    </section>
+
     <footer>
       <p class="tiny">Made by you. All math runs in your browser. No data leaves the page.</p>
     </footer>
