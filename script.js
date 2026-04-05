@@ -302,6 +302,7 @@ break`;
 
   function setLanguageCollapsedState(isCollapsed) {
     languageContent.classList.toggle("is-collapsed", isCollapsed);
+    lockVocabListButton.classList.toggle("is-hidden", isCollapsed);
     toggleLanguageButton.textContent = isCollapsed
       ? "Expand language calculator"
       : "Minimize language calculator";

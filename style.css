@@ -118,6 +118,15 @@ details.assumption {
   display: none;
 }
 
+.is-hidden {
+  display: none;
+}
+
+.radiation-card-inner {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .time-mode {
   display: flex;
   gap: 14px;
