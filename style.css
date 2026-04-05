@@ -27,6 +27,13 @@ h2 { margin: 0 0 12px; font-size: 18px; }
 
 .note { margin: 6px 0 20px; color: var(--muted); }
 
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
 .card {
   background: var(--card);
   border: 1px solid #252b3b;
@@ -91,6 +98,22 @@ details.assumption {
   margin-top: 12px;
   border-top: 1px dashed #2b3145;
   padding-top: 12px;
+}
+
+.language-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+#vocab-list[readonly] {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.is-collapsed {
+  display: none;
 }
 
 .vocab-save-controls {

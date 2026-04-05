@@ -245,10 +245,16 @@ break`;
 
   const languageInput = document.getElementById("language-input");
   const vocabList = document.getElementById("vocab-list");
+  const lockVocabListButton = document.getElementById("lock-vocab-list");
   const knownTranslation = document.getElementById("known-translation");
   const understandingPercent = document.getElementById("understanding-percent");
   const tokenView = document.getElementById("token-view");
   const vocabPreview = document.getElementById("vocab-preview");
+  const toggleRadiationButton = document.getElementById("toggle-radiation");
+  const toggleLanguageButton = document.getElementById("toggle-language");
+  const radiationContent = document.getElementById("radiation-content");
+  const languageContent = document.getElementById("language-content");
+  const radiationIntro = document.querySelector(".radiation-intro");
   const vocabSaveName = document.getElementById("vocab-save-name");
   const saveVocabListButton = document.getElementById("save-vocab-list");
   const savedVocabSelect = document.getElementById("saved-vocab-select");
@@ -257,10 +263,36 @@ break`;
   const vocabStorageKey = "language_vocab_list_v1";
   const inputStorageKey = "language_input_text_v1";
   const vocabSnapshotsKey = "language_vocab_snapshots_v1";
+  const vocabLockedKey = "language_vocab_locked_v1";
+  const radiationCollapsedKey = "radiation_collapsed_v1";
+  const languageCollapsedKey = "language_collapsed_v1";
 
   const savedVocab = localStorage.getItem(vocabStorageKey);
   vocabList.value = savedVocab && savedVocab.trim() ? savedVocab : defaultVocabText;
   languageInput.value = localStorage.getItem(inputStorageKey) || "";
+
+  function setVocabLockState(isLocked) {
+    vocabList.readOnly = isLocked;
+    lockVocabListButton.textContent = isLocked ? "Unlock vocabulary editing" : "Lock vocabulary editing";
+    localStorage.setItem(vocabLockedKey, isLocked ? "true" : "false");
+  }
+
+  function setRadiationCollapsedState(isCollapsed) {
+    radiationContent.classList.toggle("is-collapsed", isCollapsed);
+    radiationIntro.classList.toggle("is-collapsed", isCollapsed);
+    toggleRadiationButton.textContent = isCollapsed
+      ? "Expand radiation calculator"
+      : "Minimize radiation calculator";
+    localStorage.setItem(radiationCollapsedKey, isCollapsed ? "true" : "false");
+  }
+
+  function setLanguageCollapsedState(isCollapsed) {
+    languageContent.classList.toggle("is-collapsed", isCollapsed);
+    toggleLanguageButton.textContent = isCollapsed
+      ? "Expand language calculator"
+      : "Minimize language calculator";
+    localStorage.setItem(languageCollapsedKey, isCollapsed ? "true" : "false");
+  }
 
   function normalizeTerm(term) {
     return term
@@ -431,6 +463,7 @@ break`;
   function appendWordToVocabulary(rawWord) {
     const normalized = normalizeTerm(rawWord);
     if (!normalized) return;
+    if (vocabList.readOnly) return;
     const current = parseVocabulary();
     if (current.has(normalized)) return;
     vocabList.value = `${vocabList.value.trim()}\n${normalized}`.trim();
@@ -511,7 +544,21 @@ break`;
   saveVocabListButton.addEventListener("click", saveCurrentVocabularySnapshot);
   loadVocabListButton.addEventListener("click", loadSelectedVocabularySnapshot);
   deleteVocabListButton.addEventListener("click", deleteSelectedVocabularySnapshot);
+  lockVocabListButton.addEventListener("click", () => {
+    setVocabLockState(!vocabList.readOnly);
+  });
+  toggleRadiationButton.addEventListener("click", () => {
+    const next = !radiationContent.classList.contains("is-collapsed");
+    setRadiationCollapsedState(next);
+  });
+  toggleLanguageButton.addEventListener("click", () => {
+    const next = !languageContent.classList.contains("is-collapsed");
+    setLanguageCollapsedState(next);
+  });
 
+  setVocabLockState(localStorage.getItem(vocabLockedKey) === "true");
+  setRadiationCollapsedState(localStorage.getItem(radiationCollapsedKey) === "true");
+  setLanguageCollapsedState(localStorage.getItem(languageCollapsedKey) === "true");
   calculateLanguage();
   localStorage.setItem(vocabStorageKey, vocabList.value);
   renderSavedSnapshotOptions();
