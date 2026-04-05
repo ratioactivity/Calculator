@@ -249,15 +249,28 @@ break`;
   const understandingPercent = document.getElementById("understanding-percent");
   const tokenView = document.getElementById("token-view");
   const vocabPreview = document.getElementById("vocab-preview");
+  const vocabStorageKey = "language_vocab_list_v1";
+  const inputStorageKey = "language_input_text_v1";
 
-  vocabList.value = defaultVocabText;
+  const savedVocab = localStorage.getItem(vocabStorageKey);
+  vocabList.value = savedVocab && savedVocab.trim() ? savedVocab : defaultVocabText;
+  languageInput.value = localStorage.getItem(inputStorageKey) || "";
 
   function normalizeTerm(term) {
-    return term.toLowerCase().replace(/[^a-z0-9' ]+/g, "").replace(/\s+/g, " ").trim();
+    return term
+      .toLowerCase()
+      .replace(/[’‘ʼ`]/g, "'")
+      .replace(/[^a-z0-9' ]+/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   function variantForms(word) {
     const forms = new Set([word]);
+    if (word === "ive") forms.add("i've");
+    if (word === "ill") forms.add("i'll");
+    if (word === "youve") forms.add("you've");
+    if (word === "youll") forms.add("you'll");
     if (word.endsWith("'m")) forms.add(word.replace("'m", " am"));
     if (word.endsWith("'ll")) forms.add(word.replace("'ll", ""));
     if (word.endsWith("'re")) forms.add(word.replace("'re", ""));
@@ -266,8 +279,15 @@ break`;
     if (word.endsWith("'s")) forms.add(word.replace("'s", ""));
     if (word.endsWith("n't")) forms.add(word.replace("n't", ""));
     if (word === "i") forms.add("i'm");
+    if (word.endsWith("ies")) forms.add(`${word.slice(0, -3)}y`);
+    if (word.endsWith("es")) forms.add(word.slice(0, -2));
     if (word.endsWith("s")) forms.add(word.slice(0, -1));
-    if (word.endsWith("ed")) forms.add(word.slice(0, -2));
+    if (word.endsWith("ied")) forms.add(`${word.slice(0, -3)}y`);
+    if (word.endsWith("ed")) {
+      const base = word.slice(0, -2);
+      forms.add(base);
+      forms.add(`${base}e`);
+    }
     if (word.endsWith("ing")) {
       forms.add(word.slice(0, -3));
       forms.add(`${word.slice(0, -3)}e`);
@@ -311,10 +331,10 @@ break`;
   }
 
   function tokenize(text) {
-    const matches = text.match(/[A-Za-z']+|[^A-Za-z'\s]+/g) || [];
+    const matches = text.match(/[\p{L}'’]+|[^\p{L}'’\s]+/gu) || [];
     return matches.map((token) => ({
       raw: token,
-      word: /^[A-Za-z']+$/.test(token),
+      word: /^[\p{L}'’]+$/u.test(token),
       normalized: normalizeTerm(token),
     }));
   }
@@ -332,6 +352,7 @@ break`;
     const current = parseVocabulary();
     if (current.has(normalized)) return;
     vocabList.value = `${vocabList.value.trim()}\n${normalized}`.trim();
+    localStorage.setItem(vocabStorageKey, vocabList.value);
     calculateLanguage();
   }
 
@@ -391,9 +412,16 @@ break`;
     renderVocabPreview(vocabMap);
   }
 
-  languageInput.addEventListener("input", calculateLanguage);
-  vocabList.addEventListener("input", calculateLanguage);
+  languageInput.addEventListener("input", () => {
+    localStorage.setItem(inputStorageKey, languageInput.value);
+    calculateLanguage();
+  });
+  vocabList.addEventListener("input", () => {
+    localStorage.setItem(vocabStorageKey, vocabList.value);
+    calculateLanguage();
+  });
 
   calculateLanguage();
+  localStorage.setItem(vocabStorageKey, vocabList.value);
   console.log("✅ script validated");
 });
