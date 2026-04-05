@@ -400,6 +400,7 @@ break`;
         }
       } else {
         span.classList.add("punct");
+        knownOnlyOutput.push(token.raw);
       }
 
       tokenView.appendChild(span);
@@ -407,7 +408,12 @@ break`;
 
     const percent = totalWords ? (knownWords / totalWords) * 100 : 0;
     understandingPercent.textContent = `${percent.toFixed(1)}% (${knownWords}/${totalWords} words)`;
-    knownTranslation.textContent = knownOnlyOutput.length ? `${knownOnlyOutput.join(" ")}.` : "—";
+    const translationText = knownOnlyOutput
+      .join(" ")
+      .replace(/\s+([,.;:!?])/g, "$1")
+      .replace(/([([{])\s+/g, "$1")
+      .trim();
+    knownTranslation.textContent = translationText || "—";
 
     renderVocabPreview(vocabMap);
   }
