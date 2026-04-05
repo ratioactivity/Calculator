@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Radiation Unit Converter</title>
+  <title>Multi Calculator</title>
   <link rel="stylesheet" href="style.css" />
   <!-- Important: do NOT set X-Frame-Options or a restrictive CSP; Notion needs to iframe this. -->
 </head>
@@ -84,6 +84,32 @@
         Don’t use for safety decisions.
       </p>
       <button id="clear-cpm" class="ghost">Clear CPM</button>
+    </section>
+
+    <section class="card">
+      <h2>Language Vocabulary Translator</h2>
+      <p class="tiny">Keeps only words the character knows. Unknown words can be clicked to add to vocabulary.</p>
+
+      <label>Input dialogue
+        <textarea id="language-input" rows="4" placeholder="Type text to translate..."></textarea>
+      </label>
+
+      <label>Vocabulary list (one entry per line, optional note format: phrase = note)
+        <textarea id="vocab-list" rows="14"></textarea>
+      </label>
+
+      <div class="language-results">
+        <p><strong>Known-only translation:</strong> <span id="known-translation" class="tiny">—</span></p>
+        <p><strong>Understanding:</strong> <span id="understanding-percent" class="tiny">0%</span></p>
+        <div>
+          <p class="tiny"><strong>Token view</strong> (unknown terms are faded, click to add):</p>
+          <div id="token-view" class="token-view"></div>
+        </div>
+        <div>
+          <p class="tiny"><strong>Current vocabulary</strong> (hover for note):</p>
+          <div id="vocab-preview" class="vocab-preview"></div>
+        </div>
+      </div>
     </section>
 
     <footer>
