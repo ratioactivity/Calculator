@@ -97,6 +97,17 @@
       <label>Vocabulary list (one entry per line, optional note format: phrase = note)
         <textarea id="vocab-list" rows="14"></textarea>
       </label>
+      <div class="vocab-save-controls">
+        <label>Save label (example: Chapter 14)
+          <input type="text" id="vocab-save-name" placeholder="Chapter 14" />
+        </label>
+        <div class="save-row">
+          <button id="save-vocab-list" class="ghost" type="button">Save vocabulary snapshot</button>
+          <select id="saved-vocab-select"></select>
+          <button id="load-vocab-list" class="ghost" type="button">Load selected</button>
+          <button id="delete-vocab-list" class="ghost" type="button">Delete selected</button>
+        </div>
+      </div>
 
       <div class="language-results">
         <p><strong>Known-only translation:</strong> <span id="known-translation" class="tiny">—</span></p>

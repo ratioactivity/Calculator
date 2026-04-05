@@ -249,8 +249,14 @@ break`;
   const understandingPercent = document.getElementById("understanding-percent");
   const tokenView = document.getElementById("token-view");
   const vocabPreview = document.getElementById("vocab-preview");
+  const vocabSaveName = document.getElementById("vocab-save-name");
+  const saveVocabListButton = document.getElementById("save-vocab-list");
+  const savedVocabSelect = document.getElementById("saved-vocab-select");
+  const loadVocabListButton = document.getElementById("load-vocab-list");
+  const deleteVocabListButton = document.getElementById("delete-vocab-list");
   const vocabStorageKey = "language_vocab_list_v1";
   const inputStorageKey = "language_input_text_v1";
+  const vocabSnapshotsKey = "language_vocab_snapshots_v1";
 
   const savedVocab = localStorage.getItem(vocabStorageKey);
   vocabList.value = savedVocab && savedVocab.trim() ? savedVocab : defaultVocabText;
@@ -328,6 +334,82 @@ break`;
         map.set(phrase, note);
       });
     return map;
+  }
+
+  function getSavedSnapshots() {
+    const raw = localStorage.getItem(vocabSnapshotsKey);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((item) => item && item.name && item.vocabText);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeSavedSnapshots(snapshots) {
+    localStorage.setItem(vocabSnapshotsKey, JSON.stringify(snapshots));
+  }
+
+  function renderSavedSnapshotOptions() {
+    const snapshots = getSavedSnapshots();
+    savedVocabSelect.innerHTML = "";
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = snapshots.length ? "Select a saved vocabulary..." : "No saved vocab lists yet";
+    savedVocabSelect.appendChild(placeholder);
+
+    snapshots.forEach((snapshot) => {
+      const option = document.createElement("option");
+      option.value = snapshot.id;
+      option.textContent = snapshot.name;
+      savedVocabSelect.appendChild(option);
+    });
+  }
+
+  function saveCurrentVocabularySnapshot() {
+    const name = (vocabSaveName.value || "").trim();
+    if (!name) return;
+    const snapshots = getSavedSnapshots();
+    const existingIndex = snapshots.findIndex((item) => item.name.toLowerCase() === name.toLowerCase());
+    const snapshot = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      name,
+      vocabText: vocabList.value.trim(),
+      savedAt: new Date().toISOString(),
+    };
+
+    if (existingIndex >= 0) {
+      snapshots[existingIndex] = { ...snapshots[existingIndex], ...snapshot };
+    } else {
+      snapshots.push(snapshot);
+    }
+
+    writeSavedSnapshots(snapshots);
+    renderSavedSnapshotOptions();
+    const selectedSnapshot = getSavedSnapshots().find((item) => item.name.toLowerCase() === name.toLowerCase());
+    if (selectedSnapshot) savedVocabSelect.value = selectedSnapshot.id;
+  }
+
+  function loadSelectedVocabularySnapshot() {
+    const selectedId = savedVocabSelect.value;
+    if (!selectedId) return;
+    const snapshots = getSavedSnapshots();
+    const selectedSnapshot = snapshots.find((item) => item.id === selectedId);
+    if (!selectedSnapshot) return;
+    vocabList.value = selectedSnapshot.vocabText;
+    localStorage.setItem(vocabStorageKey, vocabList.value);
+    calculateLanguage();
+  }
+
+  function deleteSelectedVocabularySnapshot() {
+    const selectedId = savedVocabSelect.value;
+    if (!selectedId) return;
+    const snapshots = getSavedSnapshots().filter((item) => item.id !== selectedId);
+    writeSavedSnapshots(snapshots);
+    renderSavedSnapshotOptions();
   }
 
   function tokenize(text) {
@@ -426,8 +508,12 @@ break`;
     localStorage.setItem(vocabStorageKey, vocabList.value);
     calculateLanguage();
   });
+  saveVocabListButton.addEventListener("click", saveCurrentVocabularySnapshot);
+  loadVocabListButton.addEventListener("click", loadSelectedVocabularySnapshot);
+  deleteVocabListButton.addEventListener("click", deleteSelectedVocabularySnapshot);
 
   calculateLanguage();
   localStorage.setItem(vocabStorageKey, vocabList.value);
+  renderSavedSnapshotOptions();
   console.log("✅ script validated");
 });
