@@ -477,6 +477,21 @@ break`;
     calculateLanguage();
   }
 
+  function getUniqueVocabularyCount() {
+    const uniqueTerms = new Set();
+    vocabList.value
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .forEach((line) => {
+        const [rawPhrase] = line.split("=");
+        const normalizedPhrase = normalizeTerm(rawPhrase || "");
+        if (!normalizedPhrase) return;
+        uniqueTerms.add(normalizedPhrase);
+      });
+    return uniqueTerms.size;
+  }
+
   function getSavedSnapshots() {
     const raw = localStorage.getItem(vocabSnapshotsKey);
     if (!raw) return [];
@@ -591,7 +606,7 @@ break`;
         chip.title = note || "No note yet";
         vocabPreview.appendChild(chip);
       });
-    vocabCountOutput.textContent = String(vocabMap.size);
+    vocabCountOutput.textContent = String(getUniqueVocabularyCount());
   }
 
   function calculateLanguage() {
