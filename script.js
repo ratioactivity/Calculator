@@ -258,6 +258,8 @@ break`;
   const timeManagerContent = document.getElementById("time-manager-content");
   const radiationIntro = document.querySelector(".radiation-intro");
   const vocabSaveName = document.getElementById("vocab-save-name");
+  const dedupeVocabListButton = document.getElementById("dedupe-vocab-list");
+  const vocabCountOutput = document.getElementById("vocab-count");
   const saveVocabListButton = document.getElementById("save-vocab-list");
   const savedVocabSelect = document.getElementById("saved-vocab-select");
   const loadVocabListButton = document.getElementById("load-vocab-list");
@@ -456,6 +458,25 @@ break`;
     return map;
   }
 
+  function dedupeVocabularyList() {
+    const seen = new Set();
+    const uniqueLines = [];
+    vocabList.value
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .forEach((line) => {
+        const [rawPhrase] = line.split("=");
+        const normalizedPhrase = normalizeTerm(rawPhrase || "");
+        if (!normalizedPhrase || seen.has(normalizedPhrase)) return;
+        seen.add(normalizedPhrase);
+        uniqueLines.push(line);
+      });
+    vocabList.value = uniqueLines.join("\n");
+    localStorage.setItem(vocabStorageKey, vocabList.value);
+    calculateLanguage();
+  }
+
   function getSavedSnapshots() {
     const raw = localStorage.getItem(vocabSnapshotsKey);
     if (!raw) return [];
@@ -617,6 +638,7 @@ break`;
       .replace(/([([{])\s+/g, "$1")
       .trim();
     knownTranslation.textContent = translationText || "—";
+    vocabCountOutput.textContent = String(vocabMap.size);
 
     renderVocabPreview(vocabMap);
   }
@@ -630,6 +652,7 @@ break`;
     calculateLanguage();
   });
   saveVocabListButton.addEventListener("click", saveCurrentVocabularySnapshot);
+  dedupeVocabListButton.addEventListener("click", dedupeVocabularyList);
   loadVocabListButton.addEventListener("click", loadSelectedVocabularySnapshot);
   deleteVocabListButton.addEventListener("click", deleteSelectedVocabularySnapshot);
   lockVocabListButton.addEventListener("click", () => {

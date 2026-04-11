@@ -158,6 +158,11 @@ details.assumption {
   align-items: center;
 }
 
+.vocab-count {
+  margin: 0;
+  align-self: center;
+}
+
 #saved-vocab-select {
   width: 100%;
   padding: 8px 10px;
