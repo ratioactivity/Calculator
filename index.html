@@ -3,16 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Radiation Unit Converter</title>
+  <title>Multi Calculator</title>
   <link rel="stylesheet" href="style.css" />
   <!-- Important: do NOT set X-Frame-Options or a restrictive CSP; Notion needs to iframe this. -->
 </head>
 <body>
   <main class="container">
-    <h1>Radiation Unit Converter</h1>
-    <p class="note">How dead are you? Find out with this simple calculator.</p>
-
-    <section class="card">
+    <h1>Multi-Calculator</h1>
+    <div class="panel-actions">
+      <button id="toggle-radiation" class="ghost" type="button">Minimize radiation calculator</button>
+      <button id="toggle-language" class="ghost" type="button">Minimize language calculator</button>
+      <button id="toggle-time-manager" class="ghost" type="button">Minimize time manager</button>
+    </div>
+    <section class="card" id="radiation-card">
+    <h2>Radiation Unit Converter</h2>
+    <div id="radiation-content">
+    <p class="note radiation-intro">How dead are you? Find out with this simple calculator.</p>
+    <section class="card radiation-card-inner">
       <h2>Dose</h2>
       <div class="grid">
         <label>Sievert (Sv)
@@ -49,7 +56,7 @@
       <button id="clear-dose" class="ghost">Clear dose</button>
     </section>
 
-    <section class="card">
+    <section class="card radiation-card-inner">
       <h2>Dose rate</h2>
       <div class="grid">
         <label>µSv/h
@@ -65,7 +72,7 @@
       <button id="clear-rate" class="ghost">Clear rate</button>
     </section>
 
-    <section class="card">
+    <section class="card radiation-card-inner">
       <h2>CPM ⇄ µSv/h (approx)</h2>
       <p class="tiny">CPM→dose depends on your tube & energy. Use your own factor if you’ve calibrated.</p>
       <div class="grid">
@@ -84,6 +91,92 @@
         Don’t use for safety decisions.
       </p>
       <button id="clear-cpm" class="ghost">Clear CPM</button>
+    </section>
+    </div>
+    </section>
+
+    <section class="card" id="language-card">
+      <div class="language-header">
+        <h2>Language Vocabulary Translator</h2>
+        <button id="lock-vocab-list" class="ghost" type="button">Lock vocabulary editing</button>
+      </div>
+      <div id="language-content">
+      <p class="tiny">Keeps only words the character knows. Unknown words can be clicked to add to vocabulary.</p>
+
+      <label>Input dialogue
+        <textarea id="language-input" rows="4" placeholder="Type text to translate..."></textarea>
+      </label>
+
+      <label>Vocabulary list (one entry per line, optional note format: phrase = note)
+        <textarea id="vocab-list" rows="14"></textarea>
+      </label>
+      <div class="save-row">
+        <button id="dedupe-vocab-list" class="ghost" type="button">Delete repeats</button>
+        <p class="tiny vocab-count"><strong>Vocabulary count:</strong> <span id="vocab-count">0</span></p>
+      </div>
+      <div class="vocab-save-controls">
+        <label>Save label (example: Chapter 14)
+          <input type="text" id="vocab-save-name" placeholder="Chapter 14" />
+        </label>
+        <div class="save-row">
+          <button id="save-vocab-list" class="ghost" type="button">Save vocabulary snapshot</button>
+          <select id="saved-vocab-select"></select>
+          <button id="load-vocab-list" class="ghost" type="button">Load selected</button>
+          <button id="delete-vocab-list" class="ghost" type="button">Delete selected</button>
+        </div>
+      </div>
+
+      <div class="language-results">
+        <p><strong>Known-only translation:</strong> <span id="known-translation" class="tiny">—</span></p>
+        <p><strong>Understanding:</strong> <span id="understanding-percent" class="tiny">0%</span></p>
+        <div>
+          <p class="tiny"><strong>Token view</strong> (unknown terms are faded, click to add):</p>
+          <div id="token-view" class="token-view"></div>
+        </div>
+        <div>
+          <p class="tiny"><strong>Current vocabulary</strong> (hover for note):</p>
+          <div id="vocab-preview" class="vocab-preview"></div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="card" id="time-manager-card">
+      <h2>Time Manager</h2>
+      <div id="time-manager-content">
+        <p class="tiny">Plan tasks + breaks and see when you must begin to finish before your deadline.</p>
+
+        <div class="time-mode">
+          <label><input type="radio" name="time-start-mode" value="current" checked /> Use current time</label>
+          <label><input type="radio" name="time-start-mode" value="specific" /> Use specific start time</label>
+        </div>
+
+        <label>Specific start time
+          <input type="datetime-local" id="time-specific-start" />
+        </label>
+
+        <label>Tasks (one per line, format: Task name = minutes)
+          <textarea id="time-task-list" rows="7" placeholder="Research = 30&#10;Write draft = 45"></textarea>
+        </label>
+
+        <label>Breaks (one per line, format: Break name = minutes)
+          <textarea id="time-break-list" rows="4" placeholder="Coffee = 10&#10;Walk = 15"></textarea>
+        </label>
+
+        <label>Deadline
+          <input type="datetime-local" id="time-deadline" />
+        </label>
+
+        <button id="calculate-time-plan" class="ghost" type="button">Calculate start time</button>
+
+        <div class="time-results tiny" id="time-results">
+          <p><strong>Total task time:</strong> <span id="time-total-tasks">0 min</span></p>
+          <p><strong>Total break time:</strong> <span id="time-total-breaks">0 min</span></p>
+          <p><strong>Total required time:</strong> <span id="time-total-required">0 min</span></p>
+          <p><strong>Must start by:</strong> <span id="time-required-start">—</span></p>
+          <p><strong>Status from chosen start:</strong> <span id="time-status">—</span></p>
+        </div>
+      </div>
     </section>
 
     <footer>
