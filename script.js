@@ -591,6 +591,7 @@ break`;
         chip.title = note || "No note yet";
         vocabPreview.appendChild(chip);
       });
+    vocabCountOutput.textContent = String(vocabMap.size);
   }
 
   function calculateLanguage() {
@@ -638,7 +639,6 @@ break`;
       .replace(/([([{])\s+/g, "$1")
       .trim();
     knownTranslation.textContent = translationText || "—";
-    vocabCountOutput.textContent = String(vocabMap.size);
 
     renderVocabPreview(vocabMap);
   }

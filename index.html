@@ -112,7 +112,6 @@
       </label>
       <div class="save-row">
         <button id="dedupe-vocab-list" class="ghost" type="button">Delete repeats</button>
-        <p class="tiny vocab-count"><strong>Vocabulary count:</strong> <span id="vocab-count">0</span></p>
       </div>
       <div class="vocab-save-controls">
         <label>Save label (example: Chapter 14)
@@ -134,7 +133,10 @@
           <div id="token-view" class="token-view"></div>
         </div>
         <div>
-          <p class="tiny"><strong>Current vocabulary</strong> (hover for note):</p>
+          <div class="vocab-header tiny">
+            <p><strong>Current vocabulary</strong> (hover for note):</p>
+            <p class="vocab-count"><strong>Vocabulary count:</strong> <span id="vocab-count">0</span></p>
+          </div>
           <div id="vocab-preview" class="vocab-preview"></div>
         </div>
       </div>

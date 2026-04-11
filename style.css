@@ -163,6 +163,17 @@ details.assumption {
   align-self: center;
 }
 
+.vocab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.vocab-header p {
+  margin: 0;
+}
+
 #saved-vocab-select {
   width: 100%;
   padding: 8px 10px;
