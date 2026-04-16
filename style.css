@@ -184,6 +184,39 @@ details.assumption {
   border-radius: 10px;
 }
 
+#filament-color-inventory,
+#filament-project-colors {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--text);
+  background: #0f1420;
+  border: 1px solid #2a3247;
+  border-radius: 10px;
+}
+
+.filament-divider {
+  border-top: 1px dashed #2b3145;
+  margin: 12px 0;
+}
+
+.filament-project-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filament-project-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #2a3247;
+  border-radius: 10px;
+  background: #0f1420;
+}
+
 #known-translation {
   display: inline-block;
   margin-top: 4px;

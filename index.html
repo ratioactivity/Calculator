@@ -14,6 +14,7 @@
       <button id="toggle-radiation" class="ghost" type="button">Minimize radiation calculator</button>
       <button id="toggle-language" class="ghost" type="button">Minimize language calculator</button>
       <button id="toggle-time-manager" class="ghost" type="button">Minimize time manager</button>
+      <button id="toggle-filament-order" class="ghost" type="button">Minimize filament order calculator</button>
     </div>
     <section class="card" id="radiation-card">
     <h2>Radiation Unit Converter</h2>
@@ -177,6 +178,48 @@
           <p><strong>Total required time:</strong> <span id="time-total-required">0 min</span></p>
           <p><strong>Must start by:</strong> <span id="time-required-start">—</span></p>
           <p><strong>Status from chosen start:</strong> <span id="time-status">—</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="filament-card">
+      <h2>Filament Order Calculator</h2>
+      <div id="filament-content">
+        <p class="tiny">Plan project print order to minimize color swaps between jobs.</p>
+
+        <div class="grid">
+          <label>Add new color
+            <input type="text" id="filament-new-color" placeholder="e.g., Inland White" />
+          </label>
+          <button id="filament-add-color" class="ghost" type="button">Add color</button>
+        </div>
+
+        <label>Available colors (select one to remove)
+          <select id="filament-color-inventory" size="6"></select>
+        </label>
+        <button id="filament-remove-color" class="ghost" type="button">Remove selected color</button>
+
+        <div class="filament-divider"></div>
+
+        <label>Project name
+          <input type="text" id="filament-project-name" placeholder="e.g., Cake Clicker" />
+        </label>
+        <label>Project colors (choose 1-4)
+          <select id="filament-project-colors" size="8" multiple></select>
+        </label>
+        <button id="filament-add-project" class="ghost" type="button">Add project</button>
+
+        <div class="filament-divider"></div>
+
+        <p class="tiny"><strong>Projects</strong></p>
+        <div id="filament-project-list" class="filament-project-list"></div>
+
+        <button id="filament-calculate-order" class="ghost" type="button">Calculate best print order</button>
+
+        <div class="time-results tiny">
+          <p><strong>Suggested print order</strong></p>
+          <ol id="filament-order-output"></ol>
+          <p><strong>Estimated color swaps:</strong> <span id="filament-swap-count">0</span></p>
         </div>
       </div>
     </section>

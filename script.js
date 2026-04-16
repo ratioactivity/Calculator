@@ -253,9 +253,11 @@ break`;
   const toggleRadiationButton = document.getElementById("toggle-radiation");
   const toggleLanguageButton = document.getElementById("toggle-language");
   const toggleTimeManagerButton = document.getElementById("toggle-time-manager");
+  const toggleFilamentOrderButton = document.getElementById("toggle-filament-order");
   const radiationContent = document.getElementById("radiation-content");
   const languageContent = document.getElementById("language-content");
   const timeManagerContent = document.getElementById("time-manager-content");
+  const filamentContent = document.getElementById("filament-content");
   const radiationIntro = document.querySelector(".radiation-intro");
   const vocabSaveName = document.getElementById("vocab-save-name");
   const dedupeVocabListButton = document.getElementById("dedupe-vocab-list");
@@ -271,6 +273,9 @@ break`;
   const radiationCollapsedKey = "radiation_collapsed_v1";
   const languageCollapsedKey = "language_collapsed_v1";
   const timeManagerCollapsedKey = "time_manager_collapsed_v1";
+  const filamentCollapsedKey = "filament_collapsed_v1";
+  const filamentColorsKey = "filament_colors_v1";
+  const filamentProjectsKey = "filament_projects_v1";
   const timeStartModeInputs = document.querySelectorAll('input[name="time-start-mode"]');
   const specificStartInput = document.getElementById("time-specific-start");
   const taskListInput = document.getElementById("time-task-list");
@@ -282,6 +287,17 @@ break`;
   const totalRequiredOutput = document.getElementById("time-total-required");
   const requiredStartOutput = document.getElementById("time-required-start");
   const timeStatusOutput = document.getElementById("time-status");
+  const filamentNewColorInput = document.getElementById("filament-new-color");
+  const filamentAddColorButton = document.getElementById("filament-add-color");
+  const filamentColorInventory = document.getElementById("filament-color-inventory");
+  const filamentRemoveColorButton = document.getElementById("filament-remove-color");
+  const filamentProjectNameInput = document.getElementById("filament-project-name");
+  const filamentProjectColorsSelect = document.getElementById("filament-project-colors");
+  const filamentAddProjectButton = document.getElementById("filament-add-project");
+  const filamentProjectList = document.getElementById("filament-project-list");
+  const filamentCalculateOrderButton = document.getElementById("filament-calculate-order");
+  const filamentOrderOutput = document.getElementById("filament-order-output");
+  const filamentSwapCount = document.getElementById("filament-swap-count");
 
   const savedVocab = localStorage.getItem(vocabStorageKey);
   vocabList.value = savedVocab && savedVocab.trim() ? savedVocab : defaultVocabText;
@@ -315,6 +331,170 @@ break`;
     timeManagerContent.classList.toggle("is-collapsed", isCollapsed);
     toggleTimeManagerButton.textContent = isCollapsed ? "Expand time manager" : "Minimize time manager";
     localStorage.setItem(timeManagerCollapsedKey, isCollapsed ? "true" : "false");
+  }
+
+  function setFilamentCollapsedState(isCollapsed) {
+    filamentContent.classList.toggle("is-collapsed", isCollapsed);
+    toggleFilamentOrderButton.textContent = isCollapsed
+      ? "Expand filament order calculator"
+      : "Minimize filament order calculator";
+    localStorage.setItem(filamentCollapsedKey, isCollapsed ? "true" : "false");
+  }
+
+  function defaultFilamentColors() {
+    return [
+      "Inland White",
+      "Panchroma Pink",
+      "Elegoo Blue",
+      "eSun Yellow",
+      "Silver",
+      "Snap Yellow",
+    ];
+  }
+
+  function loadFilamentColors() {
+    const raw = localStorage.getItem(filamentColorsKey);
+    if (!raw) return defaultFilamentColors();
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return defaultFilamentColors();
+      return parsed.filter(Boolean);
+    } catch (error) {
+      return defaultFilamentColors();
+    }
+  }
+
+  function saveFilamentColors(colors) {
+    localStorage.setItem(filamentColorsKey, JSON.stringify(colors));
+  }
+
+  function loadFilamentProjects() {
+    const raw = localStorage.getItem(filamentProjectsKey);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((project) => project && project.name && Array.isArray(project.colors));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveFilamentProjects(projects) {
+    localStorage.setItem(filamentProjectsKey, JSON.stringify(projects));
+  }
+
+  let filamentColors = loadFilamentColors();
+  let filamentProjects = loadFilamentProjects();
+
+  function renderFilamentColorOptions() {
+    filamentColorInventory.innerHTML = "";
+    filamentProjectColorsSelect.innerHTML = "";
+    filamentColors
+      .slice()
+      .sort((a, b) => a.localeCompare(b))
+      .forEach((color) => {
+        const inventoryOption = document.createElement("option");
+        inventoryOption.value = color;
+        inventoryOption.textContent = color;
+        filamentColorInventory.appendChild(inventoryOption);
+
+        const projectOption = document.createElement("option");
+        projectOption.value = color;
+        projectOption.textContent = color;
+        filamentProjectColorsSelect.appendChild(projectOption);
+      });
+  }
+
+  function renderFilamentProjects() {
+    filamentProjectList.innerHTML = "";
+    filamentProjects.forEach((project, index) => {
+      const row = document.createElement("div");
+      row.className = "filament-project-item";
+
+      const text = document.createElement("span");
+      text.textContent = `${project.name}: ${project.colors.join(", ")}`;
+      row.appendChild(text);
+
+      const removeButton = document.createElement("button");
+      removeButton.className = "ghost";
+      removeButton.type = "button";
+      removeButton.textContent = "Remove";
+      removeButton.addEventListener("click", () => {
+        filamentProjects.splice(index, 1);
+        saveFilamentProjects(filamentProjects);
+        renderFilamentProjects();
+        calculateFilamentOrder();
+      });
+      row.appendChild(removeButton);
+
+      filamentProjectList.appendChild(row);
+    });
+  }
+
+  function calculateSwapCountBetweenProjects(first, second) {
+    const firstSet = new Set(first.colors);
+    const secondSet = new Set(second.colors);
+    let keptColors = 0;
+    second.colors.forEach((color) => {
+      if (firstSet.has(color)) keptColors += 1;
+    });
+    const colorsToLoad = secondSet.size - keptColors;
+    return colorsToLoad;
+  }
+
+  function calculateFilamentOrder() {
+    filamentOrderOutput.innerHTML = "";
+    if (filamentProjects.length === 0) {
+      filamentSwapCount.textContent = "0";
+      return;
+    }
+
+    const makeGreedyOrder = (startIndex) => {
+      const used = new Set([startIndex]);
+      const order = [filamentProjects[startIndex]];
+      while (order.length < filamentProjects.length) {
+        const lastProject = order[order.length - 1];
+        let bestIndex = -1;
+        let bestCost = Number.POSITIVE_INFINITY;
+        filamentProjects.forEach((candidate, candidateIndex) => {
+          if (used.has(candidateIndex)) return;
+          const cost = calculateSwapCountBetweenProjects(lastProject, candidate);
+          if (cost < bestCost) {
+            bestCost = cost;
+            bestIndex = candidateIndex;
+          }
+        });
+        used.add(bestIndex);
+        order.push(filamentProjects[bestIndex]);
+      }
+      return order;
+    };
+
+    const totalSwapCost = (orderedProjects) =>
+      orderedProjects.slice(1).reduce((sum, project, index) => {
+        const previous = orderedProjects[index];
+        return sum + calculateSwapCountBetweenProjects(previous, project);
+      }, 0);
+
+    let bestOrder = makeGreedyOrder(0);
+    let bestCost = totalSwapCost(bestOrder);
+
+    filamentProjects.forEach((_, index) => {
+      const orderAttempt = makeGreedyOrder(index);
+      const cost = totalSwapCost(orderAttempt);
+      if (cost < bestCost) {
+        bestOrder = orderAttempt;
+        bestCost = cost;
+      }
+    });
+
+    bestOrder.forEach((project) => {
+      const item = document.createElement("li");
+      item.textContent = `${project.name} (${project.colors.join(", ")})`;
+      filamentOrderOutput.appendChild(item);
+    });
+    filamentSwapCount.textContent = String(bestCost);
   }
 
   function parseMinuteEntries(rawText) {
@@ -685,6 +865,10 @@ break`;
     const next = !timeManagerContent.classList.contains("is-collapsed");
     setTimeManagerCollapsedState(next);
   });
+  toggleFilamentOrderButton.addEventListener("click", () => {
+    const next = !filamentContent.classList.contains("is-collapsed");
+    setFilamentCollapsedState(next);
+  });
   timeStartModeInputs.forEach((input) => {
     input.addEventListener("change", () => {
       specificStartInput.disabled = currentStartMode() !== "specific";
@@ -695,14 +879,59 @@ break`;
     input.addEventListener("input", calculateTimePlan);
   });
   calculateTimePlanButton.addEventListener("click", calculateTimePlan);
+  filamentAddColorButton.addEventListener("click", () => {
+    const color = (filamentNewColorInput.value || "").trim();
+    if (!color) return;
+    if (!filamentColors.includes(color)) {
+      filamentColors.push(color);
+      saveFilamentColors(filamentColors);
+      renderFilamentColorOptions();
+    }
+    filamentNewColorInput.value = "";
+  });
+  filamentRemoveColorButton.addEventListener("click", () => {
+    const selectedColor = filamentColorInventory.value;
+    if (!selectedColor) return;
+    filamentColors = filamentColors.filter((color) => color !== selectedColor);
+    filamentProjects = filamentProjects.map((project) => ({
+      ...project,
+      colors: project.colors.filter((color) => color !== selectedColor),
+    }));
+    filamentProjects = filamentProjects.filter((project) => project.colors.length > 0);
+    saveFilamentColors(filamentColors);
+    saveFilamentProjects(filamentProjects);
+    renderFilamentColorOptions();
+    renderFilamentProjects();
+    calculateFilamentOrder();
+  });
+  filamentAddProjectButton.addEventListener("click", () => {
+    const name = (filamentProjectNameInput.value || "").trim();
+    const selectedColors = Array.from(filamentProjectColorsSelect.selectedOptions).map((option) => option.value);
+    const uniqueColors = Array.from(new Set(selectedColors));
+    if (!name) return;
+    if (uniqueColors.length < 1 || uniqueColors.length > 4) return;
+    filamentProjects.push({ name, colors: uniqueColors });
+    saveFilamentProjects(filamentProjects);
+    filamentProjectNameInput.value = "";
+    Array.from(filamentProjectColorsSelect.options).forEach((option) => {
+      option.selected = false;
+    });
+    renderFilamentProjects();
+    calculateFilamentOrder();
+  });
+  filamentCalculateOrderButton.addEventListener("click", calculateFilamentOrder);
 
   setVocabLockState(localStorage.getItem(vocabLockedKey) === "true");
   setRadiationCollapsedState(localStorage.getItem(radiationCollapsedKey) === "true");
   setLanguageCollapsedState(localStorage.getItem(languageCollapsedKey) === "true");
   setTimeManagerCollapsedState(localStorage.getItem(timeManagerCollapsedKey) === "true");
+  setFilamentCollapsedState(localStorage.getItem(filamentCollapsedKey) === "true");
   specificStartInput.disabled = currentStartMode() !== "specific";
   calculateLanguage();
   calculateTimePlan();
+  renderFilamentColorOptions();
+  renderFilamentProjects();
+  calculateFilamentOrder();
   localStorage.setItem(vocabStorageKey, vocabList.value);
   renderSavedSnapshotOptions();
   console.log("✅ script validated");
