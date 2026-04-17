@@ -263,6 +263,7 @@ break`;
   const dedupeVocabListButton = document.getElementById("dedupe-vocab-list");
   const vocabCountOutput = document.getElementById("vocab-count");
   const saveVocabListButton = document.getElementById("save-vocab-list");
+  const saveVocabBackupButton = document.getElementById("save-vocab-backup");
   const savedVocabSelect = document.getElementById("saved-vocab-select");
   const loadVocabListButton = document.getElementById("load-vocab-list");
   const deleteVocabListButton = document.getElementById("delete-vocab-list");
@@ -349,6 +350,36 @@ break`;
       "eSun Yellow",
       "Silver",
       "Snap Yellow",
+      "Fluorite",
+      "Moonstone",
+      "Orange-Pink",
+      "eSun White",
+      "Black",
+      "Dark Brown",
+      "Coffee Brown",
+      "Overture Tan",
+      "Ugly Tan",
+      "Gold",
+      "Red",
+      "Overture Green",
+      "Emerald Green",
+      "Bone White",
+      "Bright Yellow",
+      "Pale Yellow",
+      "Purple",
+      "OOV3D Rainbow",
+      "ZIRO Cherry Blossom",
+      "GratKit Ocean",
+      "Navy",
+      "UV Green",
+      "Blue Sparkle",
+      "Translucent Orange",
+      "Silk White",
+      "ZIRO Rainbow",
+      "Clear",
+      "eSun Orange",
+      "Soleyin Rosehip",
+      "Amolen Pink",
     ];
   }
 
@@ -729,6 +760,20 @@ break`;
     if (selectedSnapshot) savedVocabSelect.value = selectedSnapshot.id;
   }
 
+  function saveVocabularyBackupFile() {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const content = vocabList.value.trim();
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `language-vocab-backup-${timestamp}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   function loadSelectedVocabularySnapshot() {
     const selectedId = savedVocabSelect.value;
     if (!selectedId) return;
@@ -847,6 +892,7 @@ break`;
     calculateLanguage();
   });
   saveVocabListButton.addEventListener("click", saveCurrentVocabularySnapshot);
+  saveVocabBackupButton.addEventListener("click", saveVocabularyBackupFile);
   dedupeVocabListButton.addEventListener("click", dedupeVocabularyList);
   loadVocabListButton.addEventListener("click", loadSelectedVocabularySnapshot);
   deleteVocabListButton.addEventListener("click", deleteSelectedVocabularySnapshot);
